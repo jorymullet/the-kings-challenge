@@ -1,0 +1,25 @@
+{
+  "name": "the-kings-challenge",
+  "version": "1.0.0",
+  "description": "Who can resist challenging the king?",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "ts-node ./test-me.ts",
+    "build": "tsc --build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jorymullet/the-kings-challenge.git"
+  },
+  "keywords": [
+    "euchre",
+    "king",
+    "kings"
+  ],
+  "author": "Joshua Mullet + ChatGPT 4 + Jesus Christ My Lord and Savior Through Whom I do all things.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jorymullet/the-kings-challenge/issues"
+  },
+  "homepage": "https://github.com/jorymullet/the-kings-challenge#readme"
+}
