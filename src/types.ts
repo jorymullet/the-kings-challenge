@@ -14,19 +14,35 @@ export type Team = {
 export type Player = {
   name: string
   hand: Card[]
-  tricksWon: number
-  score: number
-  isDealer: boolean
   team: Team
 }
 
+export type PlayedCard = {
+  card: Card
+  player: Player
+}
+
+export type Trick = {
+  playedCards: PlayedCard[] // Cards played in the trick
+  leadingPlayer: Player | null
+  winningCard: PlayedCard | null // Card that won the round
+}
+
+
+export type Round = {
+  trump: Suit | null // Current trump suit or null if not yet determined
+  trumpCaller: Player | null // Player who decided trump for the round
+  turn: Player// Reference to the player whose turn it is to play
+  tricks: Trick[] // Array of previous tricks, each represented as an array of cards
+  deck: Card[] // Current deck of cards
+  dealer: Player
+  shootingTheMoon: Boolean
+}
+
 export type Game = {
+  previousRounds: Round[]
   team1: Team
   team2: Team
-  currentTrick: Card[] // Cards played in the current trick
-  trump: Suit | null // Current trump suit or null if not yet determined
-  dealer: Player // Reference to the current dealer
-  turn: Player // Reference to the player whose turn it is to play
   score: { team1: number; team2: number } // Score for each team
-  previousTricks: Card[][] // Array of previous tricks, each represented as an array of cards
+  players: Player[]
 }
