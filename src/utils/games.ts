@@ -168,6 +168,7 @@ function playTrick(round: Round, game: Game): Trick {
   while (round.turn !== trick.leadingPlayer) {
     console.log('Current Player: ', round.turn.name)
     // here is where the infinite loop is happening
+    // TODO: when someone goes alone, it's possible the 'play trick' function goes infinitely.
     const card = pickRandomPlayableCard(round.turn.hand, leadingCard, round.trump as Suit)
     removeCardFromHand(round, card)
 
