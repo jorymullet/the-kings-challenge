@@ -1,4 +1,4 @@
-import { Game, Player, Round, Suit, Trick, Card } from '../types'
+import { Game, Player, Round, Suit, Trick, Card, PlayedCard } from '../types'
 import { BAUER_RANK, RANK_ORDER, TRUMP_RANK_ORDER } from '../constants/cards'
 import * as odds from './odds'
 
@@ -91,6 +91,7 @@ export function decideTrumpAndTrumpCaller(
   let currentBidder = getLeftOfMe(dealer, round, game)
 
   do { // go around and see if we want to pick up the face up card
+    console.log('Current Bidder on face up card: ', currentBidder.name)
     const allCardsAreFaceUpSuit = currentBidder.hand.every(card => card.suit === faceUpCard)
     const isFaceUpCardInPlayerHand = currentBidder.hand.find(card => card.suit === faceUpCard)
 
@@ -106,6 +107,7 @@ export function decideTrumpAndTrumpCaller(
   if (round.trump) return
 
   do { // go around and see if we want to pick up a random suit
+    console.log('Current Bidder on other card: ', currentBidder.name)
     if (
       (currentBidder === dealer) || // dealer must pick up a random suit (aka "stick the dealer")
       odds.ofDealing()
@@ -164,6 +166,8 @@ function playTrick(round: Round, game: Game): Trick {
   round.turn = getLeftOfMe(round.turn as Player, round, game)
 
   while (round.turn !== trick.leadingPlayer) {
+    console.log('Current Player: ', round.turn.name)
+    // here is where the infinite loop is happening
     const card = pickRandomPlayableCard(round.turn.hand, leadingCard, round.trump as Suit)
     removeCardFromHand(round, card)
 
@@ -205,7 +209,7 @@ function haveSameSuit(winningCard: Card, incomingCard: Card, trump: Suit) {
     (isLeftBauer(winningCard, trump) && incomingCard.suit === trump)
 }
 
-function decideWinner(trick: Trick, round: Round) {
+export function decideWinner(trick: Trick, round: Round) {
   const { playedCards } = trick
   const { trump } = round
 
@@ -234,24 +238,46 @@ function decideWinner(trick: Trick, round: Round) {
   round.turn = winningPlayedCard.player
 }
 
+function awardPoints(round: Round, game: Game) {
+  const { tricks, trumpCaller, shootingTheMoon } = round
+
+  const [team1HandCount, team2HandCount] = tricks.reduce((handCounts, trick) => {
+    const { winningCard } = trick
+    const { player } = winningCard as PlayedCard
+
+    handCounts[player.team === game.team1 ? 0 : 1] += 1
+
+    return handCounts
+  }, [0, 0])
+
+  console.log('Hand Counts: ', team1HandCount, team2HandCount)
+  console.log('Team 1: ', game.team1.player1.name, game.team1.player2.name)
+  console.log('Team 2: ', game.team2.player1.name, game.team2.player2.name)
+  console.log('Trump Caller: ', trumpCaller?.name)
+
+  const winningTeam = team1HandCount > team2HandCount ? game.team1 : game.team2
+  const winningTeamCalledTrump = winningTeam === trumpCaller?.team
+
+  let pointsToAssign = 1
+
+  if (!winningTeamCalledTrump) {
+    pointsToAssign = 2
+  } else if (shootingTheMoon && Math.abs(team1HandCount - team2HandCount) === 5) {
+    pointsToAssign = 4
+  }
+
+  game.score[winningTeam === game.team1 ? 'team1' : 'team2'] += pointsToAssign
+  console.log(game.score)
+}
+
 export function playRound(round: Round, game: Game) {
   const numberOfTricks = round.dealer.hand.length
 
   Array(numberOfTricks).fill(null).forEach(() => {
     const trick = playTrick(round, game)
     decideWinner(trick, round)
-    console.log('Trump is: ', round.trump)
-    console.log('Cards: ', trick.playedCards.map(({ player: { name, hand }, card }) => ({
-      card,
-      name,
-      hand: JSON.stringify(hand)
-        // .replaceAll('"spades"', "♠️")
-        // .replaceAll('"clubs"', "♣️")
-        // .replaceAll('"hearts"', "❤️")
-        // .replaceAll('"diamonds"', "♦️")
-        .replaceAll('"suit":', ' ')
-        .replaceAll('"rank":', ' '),
-    })))
-    console.log('Winner: ', trick.winningCard, '\n\n\n')
+    round.tricks.push(trick)
   })
+
+  awardPoints(round, game)
 }

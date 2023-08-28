@@ -57,7 +57,7 @@ export function pickRandomPlayableCard(
   leadCard: Card,
   trump: Suit,
 ): Card {
-  const { suit: leadSuit, rank: leadRank } = leadCard
+  const { suit: leadSuit } = leadCard
 
   const leadIsTrump = isCardTrump(leadCard, trump)
 
